@@ -1,8 +1,6 @@
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextLineHorizontal, LTTextContainer, LTChar
 
-ALLOW_SPACE_CHARS = [',']
-
 IGNORED_PAGES = [
     *range(16),
     # title pages
@@ -61,11 +59,9 @@ IGNORED_PAGES = [
     *range(885, 888),
 ]
 
-# print(IGNORED_PAGES)
-# exit(0)
-
-ALLOW_SPACE = [',']
-ALLOW_LINE_BREAK = [':', ';']
+ALLOW_SPACE = (',', ')', '\'', '"', '”', '%', '–')
+ALLOW_LINE_BREAK = (':', ';', '?')
+ALLOW_CONTINUE = ('\n', '/')
 
 
 def join_lines(lines: list[str]):
@@ -73,13 +69,13 @@ def join_lines(lines: list[str]):
 
     for text in lines:
         if line:
-            if line[-1].isalpha() and text.split(' ')[0] in [
+            if line[-1].isalnum() and text.split(' ')[0] in [
                 'TÍTULO',
                 'CAPÍTULO',
             ]:
                 line += f'\n{text}'
 
-            elif line[-1].isalpha() or line[-1] in ALLOW_SPACE:
+            elif line[-1].isalnum() or line[-1] in ALLOW_SPACE:
                 line += f' {text}'
 
             elif line[-1] == '-':
@@ -88,7 +84,7 @@ def join_lines(lines: list[str]):
             elif line[-1] in ALLOW_LINE_BREAK:
                 line += f'\n\t{text}'
 
-            elif line[-1] == '\n':
+            elif line[-1] in ALLOW_CONTINUE:
                 line += text
 
             else:
@@ -142,9 +138,6 @@ def extract_text(pdf_path):
         if page_number in IGNORED_PAGES:
             continue
 
-        if page_number > 23:
-            break  # TODO: remove
-
         for element in page_layout:
             if isinstance(element, LTTextContainer):
                 for text_line in element:
@@ -164,7 +157,7 @@ def extract_text(pdf_path):
                             font_name == 'ASSXNX+BarlowSemiCondensed-Medium'
                             and font_size == 14.0
                         ):
-                            lines.append((text.strip(), font_size))
+                            lines.append((text.replace('\t', ' ').strip(), font_size))
 
     lines = aggregate_by_fonts(lines)
 
@@ -175,6 +168,9 @@ if __name__ == '__main__':
     pdf_path = 'data/pdf/Vade_mecum_2023.pdf'
     result = extract_text(pdf_path)
 
-    for text in result:
-        print(text)
-        print('-' * 100)
+    with open("data.txt", "w") as outfile:
+        outfile.write("\n".join(result))
+
+    # for text in result:
+    #     print(text)
+    #     print('-' * 100)
