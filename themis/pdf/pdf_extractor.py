@@ -104,51 +104,86 @@ class PDFExtractor:
             if page_number in IGNORED_PAGES:
                 continue
 
-            if page_number > 28:
+            if page_number > 100:
                 break
+
+            text_elements = []
 
             for element in page_layout:
                 if isinstance(element, LTTextContainer):
                     for text_line in element:
                         if isinstance(text_line, LTTextLineHorizontal):
-                            text = ''
-                            note_ref = ''
-                            font_name = None
-                            font_size = None
+                            text_elements.append(text_line)
 
-                            for text_element in text_line:
-                                if isinstance(text_element, LTChar):
-                                    content = text_element.get_text()
+            # fix elements positions based on x coords
+            changed = True
 
-                                    # get note reference
-                                    if round(text_element.size, 1) in [
-                                        4.1,
-                                        5.5,
-                                    ]:
-                                        if content.isnumeric():
-                                            note_ref += content
+            while changed:
+                curr_id = 0
+                changed = False
 
-                                    elif font_size is None:
-                                        font_name = text_element.fontname
-                                        font_size = round(text_element.size, 1)
-                                        text += content
+                while curr_id < len(text_elements) - 1:
+                    if (
+                        text_elements[curr_id].x0
+                        - text_elements[curr_id + 1].x0
+                        > 100
+                    ):
+                        new_pos_id = curr_id + 1
 
-                                    else:
-                                        text += content
+                        while new_pos_id < len(text_elements) and (
+                            text_elements[curr_id].x0
+                            - text_elements[new_pos_id].x0
+                            > 100
+                        ):
+                            new_pos_id += 1
 
-                            # ignore page number
-                            if not (
-                                font_name
-                                == 'ASSXNX+BarlowSemiCondensed-Medium'
-                                and font_size == 14.0
-                            ):
-                                self.lines.append(
-                                    (
-                                        text.replace('\t', ' ').strip(),
-                                        font_size,
-                                        0 if note_ref == '' else int(note_ref),
-                                    )
-                                )
+                        new_pos_id -= 1
+
+                        element = text_elements.pop(curr_id)
+                        text_elements.insert(new_pos_id, element)
+                        changed = True
+
+                    curr_id += 1
+
+            # process texts
+            for element in text_elements:
+                text = ''
+                note_ref = ''
+                font_name = None
+                font_size = None
+
+                for text_element in element:
+                    if isinstance(text_element, LTChar):
+                        content = text_element.get_text()
+
+                        # get note reference
+                        if round(text_element.size, 1) in [
+                            4.1,
+                            5.5,
+                        ]:
+                            if content.isnumeric():
+                                note_ref += content
+
+                        elif font_size is None:
+                            font_name = text_element.fontname
+                            font_size = round(text_element.size, 1)
+                            text += content
+
+                        else:
+                            text += content
+
+                # ignore page number
+                if not (
+                    font_name == 'ASSXNX+BarlowSemiCondensed-Medium'
+                    and font_size == 14.0
+                ):
+                    self.lines.append(
+                        (
+                            text.replace('\t', ' ').strip(),
+                            font_size,
+                            0 if note_ref == '' else int(note_ref),
+                        )
+                    )
 
         self.lines = self._aggregate_by_fonts(self.lines)
 

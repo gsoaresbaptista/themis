@@ -1,4 +1,11 @@
-from utils import MainBlock, Title, Article, Chapter, ConstitutionParser
+from utils import (
+    MainBlock,
+    Title,
+    Article,
+    Chapter,
+    ConstitutionParser,
+    Section,
+)
 
 
 class PDFLayout:
@@ -6,32 +13,43 @@ class PDFLayout:
         self._lines = lines
 
     def build(self) -> list[MainBlock]:
-        sections = []
+        book_sections = []
         notes = []
 
         for text, font_size, references in self._lines:
             if font_size == 28:
                 section = MainBlock()
                 section.set_name(text)
-                sections.append(section)
+                book_sections.append(section)
                 print('SET SECTION NAME:', text)
 
             elif font_size == 11:
                 if text.startswith('CAPÍTULO'):
                     chapter = Chapter()
                     chapter.set_name(text)
-                    sections[-1].add_chapter(chapter)
+                    book_sections[-1].add_chapter(chapter)
                     print('SET CHAPTER NAME:', text)
 
-                elif text.startswith('TÍTULO') or text.startswith('Preâmbulo'):
+                elif (
+                    text.startswith('TÍTULO')
+                    or text.startswith('Preâmbulo')
+                    or text.startswith('Ato')
+                ):
                     title = Title()
                     title.set_name(text)
-                    sections[-1].add_title(title)
+                    book_sections[-1].add_title(title)
                     print('SET TITLE NAME:', text)
 
                 else:
                     print(f'* Unhandled case: [{text}] ({font_size})')
                     exit()
+
+            elif font_size == 10:
+                if text.startswith('Seção'):
+                    section = Section()
+                    section.set_name(text)
+                    book_sections[-1].add_section(section)
+                    print('SET SECTION NAME:', text)
 
             elif font_size == 9.5:
                 articles = ConstitutionParser.parse_articles(text)
@@ -43,7 +61,7 @@ class PDFLayout:
                 )
 
                 for article in articles:
-                    sections[-1].add_article(article)
+                    book_sections[-1].add_article(article)
                     notes.extend(article.get_references())
 
                 print('SET ARTICLE CONTENT')
@@ -51,7 +69,9 @@ class PDFLayout:
             elif font_size == 7.0 and (
                 text.startswith('Nota do Editor') or text.startswith('NE')
             ):
-                references.remove(0)
+                if 0 in references:
+                    references.remove(0)
+
                 note_id = references[0]
 
                 for note in notes:
@@ -63,4 +83,4 @@ class PDFLayout:
                 print(f'Unhandled case: [{text}] ({font_size})')
                 exit(0)
 
-        return sections
+        return book_sections

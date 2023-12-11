@@ -26,7 +26,8 @@ class Article:
         self._content: str = content
 
         # process references
-        references.remove(0)
+        if 0 in references:
+            references.remove(0)
 
         self._references = [Note(ref_id) for ref_id in references]
 
@@ -40,13 +41,38 @@ class Article:
         return self._content
 
 
-class Chapter(WrapperTextElement):
+class SubSection(WrapperTextElement):
     def __init__(self) -> None:
         super().__init__()
         self._articles: list[Article] = list()
 
     def add_article(self, article: Article) -> None:
         self._articles.append(article)
+
+
+class Section(WrapperTextElement):
+    def __init__(self) -> None:
+        super().__init__()
+        self._sub_sections: list[SubSection] = list()
+
+    def add_article(self, article: Article) -> None:
+        if not self._sub_sections:
+            self._sub_sections.append(SubSection())
+        self._sub_sections[-1].add_article(article)
+
+
+class Chapter(WrapperTextElement):
+    def __init__(self) -> None:
+        super().__init__()
+        self._sections: list[Section] = list()
+
+    def add_article(self, article: Article) -> None:
+        if not self._sections:
+            self._sections.append(Section())
+        self._sections[-1].add_article(article)
+
+    def add_section(self, section: Section) -> None:
+        self._sections.append(section)
 
 
 class Title(WrapperTextElement):
@@ -62,6 +88,9 @@ class Title(WrapperTextElement):
             self._chapters.append(Chapter())
         self._chapters[-1].add_article(article)
 
+    def add_section(self, section: Section) -> None:
+        self._chapters[-1].add_section(section)
+
 
 class MainBlock(WrapperTextElement):
     def __init__(self) -> None:
@@ -76,6 +105,9 @@ class MainBlock(WrapperTextElement):
 
     def add_article(self, article: Article) -> None:
         self._titles[-1].add_article(article)
+
+    def add_section(self, section: Section) -> None:
+        self._titles[-1].add_section(section)
 
 
 class ConstitutionParser:
