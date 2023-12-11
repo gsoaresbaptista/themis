@@ -60,7 +60,7 @@ class PDFExtractor:
         current_lines, current_font, current_ref = (
             [],
             lines[0][1],
-            [lines[0][2]],
+            lines[0][2],
         )
 
         current_id = 0
@@ -76,7 +76,22 @@ class PDFExtractor:
                 current_lines.append(lines[current_id][0])
 
                 if lines[current_id][2] not in current_ref:
-                    current_ref.append(lines[current_id][2])
+                    current_ref.extend(lines[current_id][2])
+
+            # check if there is a note in the middle
+            elif lines[current_id][1] != current_font and lines[current_id][1] == 7.0:
+                start_reference_id = current_id
+                reference_content = []
+                reference_indices = []
+
+                while start_reference_id < len(lines) and lines[start_reference_id][1] == 7.0:
+                    reference_content.append(lines[start_reference_id][0])
+                    reference_indices.extend(lines[start_reference_id][2])
+                    start_reference_id += 1
+
+                reference_content = self._join_lines(reference_content)
+                book.insert(-1, (reference_content, 7.0, reference_indices))
+                current_id = start_reference_id
 
             else:
                 current_line = self._join_lines(current_lines)
@@ -87,7 +102,7 @@ class PDFExtractor:
 
                 current_lines = [lines[current_id][0]]
                 current_font = lines[current_id][1]
-                current_ref = [lines[current_id][2]]
+                current_ref = lines[current_id][2]
 
             current_id += 1
 
@@ -104,7 +119,7 @@ class PDFExtractor:
             if page_number in IGNORED_PAGES:
                 continue
 
-            if page_number > 100:
+            if page_number > 200:
                 break
 
             text_elements = []
@@ -149,6 +164,7 @@ class PDFExtractor:
             for element in text_elements:
                 text = ''
                 note_ref = ''
+                last_font = None
                 font_name = None
                 font_size = None
 
@@ -162,7 +178,10 @@ class PDFExtractor:
                             5.5,
                         ]:
                             if content.isnumeric():
-                                note_ref += content
+                                if last_font == text_element.size:
+                                    note_ref += content
+                                else:
+                                    note_ref += '-' + content
 
                         elif font_size is None:
                             font_name = text_element.fontname
@@ -171,6 +190,8 @@ class PDFExtractor:
 
                         else:
                             text += content
+
+                        last_font = text_element.size
 
                 # ignore page number
                 if not (
@@ -181,7 +202,7 @@ class PDFExtractor:
                         (
                             text.replace('\t', ' ').strip(),
                             font_size,
-                            0 if note_ref == '' else int(note_ref),
+                            [] if note_ref == '' else [int(ref) for ref in note_ref.split('-') if ref != ''],
                         )
                     )
 

@@ -14,16 +14,15 @@ class PDFLayout:
 
     def build(self) -> list[MainBlock]:
         book_sections = []
-        notes = []
 
         for text, font_size, references in self._lines:
             if font_size == 28:
                 section = MainBlock()
                 section.set_name(text)
                 book_sections.append(section)
-                print('SET SECTION NAME:', text)
+                print('SET MAIN BLOCK NAME:', text)
 
-            elif font_size == 11:
+            elif font_size == 11 or font_size == 18:
                 if text.startswith('CAPÍTULO'):
                     chapter = Chapter()
                     chapter.set_name(text)
@@ -34,15 +33,19 @@ class PDFLayout:
                     text.startswith('TÍTULO')
                     or text.startswith('Preâmbulo')
                     or text.startswith('Ato')
+                    or font_size == 18
                 ):
                     title = Title()
                     title.set_name(text)
                     book_sections[-1].add_title(title)
                     print('SET TITLE NAME:', text)
 
+                    if font_size == 18:
+                        print('TITLE WITH FONT 18:', text)
+
                 else:
                     print(f'* Unhandled case: [{text}] ({font_size})')
-                    exit()
+                    exit(0)
 
             elif font_size == 10:
                 if text.startswith('Seção'):
@@ -62,22 +65,21 @@ class PDFLayout:
 
                 for article in articles:
                     book_sections[-1].add_article(article)
-                    notes.extend(article.get_references())
 
-                print('SET ARTICLE CONTENT')
+                print('SET ARTICLE CONTENT', text[:50].replace('\n', ''))
+
+            elif font_size == 8:
+                print('*Ignoring data:', text)
 
             elif font_size == 7.0 and (
                 text.startswith('Nota do Editor') or text.startswith('NE')
             ):
-                if 0 in references:
-                    references.remove(0)
+                notes = text.split('\n')
 
-                note_id = references[0]
-
-                for note in notes:
-                    if note._id == note_id:
-                        note.add_content(text)
-                        break
+                for content, indice in zip(notes, references):
+                    book_sections[-1].add_reference(indice, content)
+                
+                print('SET REFERENCES:', references)
 
             else:
                 print(f'Unhandled case: [{text}] ({font_size})')

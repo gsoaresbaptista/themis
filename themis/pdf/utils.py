@@ -24,12 +24,7 @@ class Article:
         self, content: str = '', references: list[int] = list()
     ) -> None:
         self._content: str = content
-
-        # process references
-        if 0 in references:
-            references.remove(0)
-
-        self._references = [Note(ref_id) for ref_id in references]
+        self._references = references
 
     def get_references(self) -> list[Note]:
         return self._references
@@ -96,6 +91,7 @@ class MainBlock(WrapperTextElement):
     def __init__(self) -> None:
         super().__init__()
         self._titles: list[Title] = list()
+        self._notes: list[Note] = list()
 
     def add_chapter(self, chapter: Chapter) -> None:
         self._titles[-1].add_chapter(chapter)
@@ -108,6 +104,11 @@ class MainBlock(WrapperTextElement):
 
     def add_section(self, section: Section) -> None:
         self._titles[-1].add_section(section)
+
+    def add_reference(self, id: int, content: str) -> None:
+        note = Note(id)
+        note.add_content(content)
+        self._notes.append(note)
 
 
 class ConstitutionParser:
