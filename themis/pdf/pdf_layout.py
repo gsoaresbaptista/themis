@@ -3,8 +3,9 @@ from utils import (
     Title,
     Article,
     Chapter,
-    ConstitutionParser,
     Section,
+    Book,
+    ConstitutionParser,
 )
 
 
@@ -43,6 +44,12 @@ class PDFLayout:
                     if font_size == 18:
                         print('TITLE WITH FONT 18:', text)
 
+                elif text.startswith('LIVRO '):
+                    book = Book()
+                    book.set_name(text)
+                    book_sections[-1].add_book(book)
+                    print('SET BOOK NAME:', text)
+
                 else:
                     print(f'* Unhandled case: [{text}] ({font_size})')
                     exit(0)
@@ -78,7 +85,7 @@ class PDFLayout:
 
                 for content, indice in zip(notes, references):
                     book_sections[-1].add_reference(indice, content)
-                
+
                 print('SET REFERENCES:', references)
 
             else:

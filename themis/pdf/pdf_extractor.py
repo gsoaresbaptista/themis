@@ -79,12 +79,18 @@ class PDFExtractor:
                     current_ref.extend(lines[current_id][2])
 
             # check if there is a note in the middle
-            elif lines[current_id][1] != current_font and lines[current_id][1] == 7.0:
+            elif (
+                lines[current_id][1] != current_font
+                and lines[current_id][1] == 7.0
+            ):
                 start_reference_id = current_id
                 reference_content = []
                 reference_indices = []
 
-                while start_reference_id < len(lines) and lines[start_reference_id][1] == 7.0:
+                while (
+                    start_reference_id < len(lines)
+                    and lines[start_reference_id][1] == 7.0
+                ):
                     reference_content.append(lines[start_reference_id][0])
                     reference_indices.extend(lines[start_reference_id][2])
                     start_reference_id += 1
@@ -193,16 +199,25 @@ class PDFExtractor:
 
                         last_font = text_element.size
 
-                # ignore page number
+                # ignore page number and not used titles
                 if not (
                     font_name == 'ASSXNX+BarlowSemiCondensed-Medium'
                     and font_size == 14.0
+                ) and not (
+                    font_size == 11.0
+                    and text in ['PARTE GERAL', 'PARTE ESPECIAL']
                 ):
                     self.lines.append(
                         (
                             text.replace('\t', ' ').strip(),
                             font_size,
-                            [] if note_ref == '' else [int(ref) for ref in note_ref.split('-') if ref != ''],
+                            []
+                            if note_ref == ''
+                            else [
+                                int(ref)
+                                for ref in note_ref.split('-')
+                                if ref != ''
+                            ],
                         )
                     )
 

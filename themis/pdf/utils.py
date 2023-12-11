@@ -87,23 +87,50 @@ class Title(WrapperTextElement):
         self._chapters[-1].add_section(section)
 
 
-class MainBlock(WrapperTextElement):
+class Book(WrapperTextElement):
     def __init__(self) -> None:
         super().__init__()
         self._titles: list[Title] = list()
-        self._notes: list[Note] = list()
-
-    def add_chapter(self, chapter: Chapter) -> None:
-        self._titles[-1].add_chapter(chapter)
 
     def add_title(self, title: Title) -> None:
         self._titles.append(title)
 
     def add_article(self, article: Article) -> None:
+        if not self._titles:
+            self._titles.append(Title())
         self._titles[-1].add_article(article)
+
+    def add_chapter(self, chapter: Chapter) -> None:
+        self._titles[-1].add_chapter(chapter)
 
     def add_section(self, section: Section) -> None:
         self._titles[-1].add_section(section)
+
+
+class MainBlock(WrapperTextElement):
+    def __init__(self) -> None:
+        super().__init__()
+        self._books: list[Book] = list()
+        self._notes: list[Note] = list()
+
+    def add_chapter(self, chapter: Chapter) -> None:
+        self._books[-1].add_chapter(chapter)
+
+    def add_title(self, title: Title) -> None:
+        if not self._books:
+            self._books.append(Book())
+        self._books[-1].add_title(title)
+
+    def add_article(self, article: Article) -> None:
+        if not self._books:
+            self._books.append(Book())
+        self._books[-1].add_article(article)
+
+    def add_section(self, section: Section) -> None:
+        self._books[-1].add_section(section)
+
+    def add_book(self, book: Book) -> None:
+        self._books.append(book)
 
     def add_reference(self, id: int, content: str) -> None:
         note = Note(id)
