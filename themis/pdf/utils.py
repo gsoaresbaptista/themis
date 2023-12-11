@@ -70,7 +70,7 @@ class Chapter(WrapperTextElement):
         self._sections.append(section)
 
 
-class Title(WrapperTextElement):
+class SubTitle(WrapperTextElement):
     def __init__(self) -> None:
         super().__init__()
         self._chapters: list[Chapter] = list()
@@ -85,6 +85,25 @@ class Title(WrapperTextElement):
 
     def add_section(self, section: Section) -> None:
         self._chapters[-1].add_section(section)
+
+
+class Title(WrapperTextElement):
+    def __init__(self) -> None:
+        super().__init__()
+        self._sub_titles: list[SubTitle] = list()
+
+    def add_chapter(self, chapter: Chapter) -> None:
+        if not self._sub_titles:
+            self._sub_titles.append(SubTitle())
+        self._sub_titles[-1].add_chapter(chapter)
+
+    def add_article(self, article: Article) -> None:
+        if not self._sub_titles:
+            self._sub_titles.append(SubTitle())
+        self._sub_titles[-1].add_article(article)
+
+    def add_section(self, section: Section) -> None:
+        self._sub_titles[-1].add_section(section)
 
 
 class Book(WrapperTextElement):

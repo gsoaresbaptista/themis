@@ -1,6 +1,7 @@
 from utils import (
     MainBlock,
     Title,
+    SubTitle,
     Article,
     Chapter,
     Section,
@@ -43,6 +44,12 @@ class PDFLayout:
 
                     if font_size == 18:
                         print('TITLE WITH FONT 18:', text)
+
+                elif text.startswith('SUBTÍTULO'):
+                    subtitle = SubTitle()
+                    subtitle.set_name(text)
+                    book_sections[-1].add_title(subtitle)
+                    print('SET SUBTITLE NAME:', text)
 
                 elif text.startswith('LIVRO '):
                     book = Book()
