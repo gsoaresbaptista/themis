@@ -10,9 +10,28 @@ class WrapperTextElement:
         self._name = name
 
 
+class Note:
+    def __init__(self, id: int) -> None:
+        self._id: int = id
+        self._content: str
+
+    def add_content(self, content: str) -> None:
+        self._content = content
+
+
 class Article:
-    def __init__(self, content: str = '') -> None:
+    def __init__(
+        self, content: str = '', references: list[int] = list()
+    ) -> None:
         self._content: str = content
+
+        # process references
+        references.remove(0)
+
+        self._references = [Note(ref_id) for ref_id in references]
+
+    def get_references(self) -> list[Note]:
+        return self._references
 
     def set_content(self, content: str) -> None:
         self._content = content
@@ -44,7 +63,7 @@ class Title(WrapperTextElement):
         self._chapters[-1].add_article(article)
 
 
-class Section(WrapperTextElement):
+class MainBlock(WrapperTextElement):
     def __init__(self) -> None:
         super().__init__()
         self._titles: list[Title] = list()

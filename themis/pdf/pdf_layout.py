@@ -1,16 +1,17 @@
-from utils import Section, Title, Article, Chapter, ConstitutionParser
+from utils import MainBlock, Title, Article, Chapter, ConstitutionParser
 
 
 class PDFLayout:
     def __init__(self, lines: list[str]) -> None:
         self._lines = lines
 
-    def build(self) -> list[Section]:
+    def build(self) -> list[MainBlock]:
         sections = []
+        notes = []
 
         for text, font_size, references in self._lines:
             if font_size == 28:
-                section = Section()
+                section = MainBlock()
                 section.set_name(text)
                 sections.append(section)
                 print('SET SECTION NAME:', text)
@@ -36,18 +37,27 @@ class PDFLayout:
                 articles = ConstitutionParser.parse_articles(text)
 
                 articles = (
-                    [Article(content) for content in articles]
+                    [Article(content, references) for content in articles]
                     if articles
-                    else [Article(text)]
+                    else [Article(text, references)]
                 )
 
                 for article in articles:
                     sections[-1].add_article(article)
+                    notes.extend(article.get_references())
 
                 print('SET ARTICLE CONTENT')
 
-            # elif font_size == 4.1 or font_size == 7.0:
-            #     continue
+            elif font_size == 7.0 and (
+                text.startswith('Nota do Editor') or text.startswith('NE')
+            ):
+                references.remove(0)
+                note_id = references[0]
+
+                for note in notes:
+                    if note._id == note_id:
+                        note.add_content(text)
+                        break
 
             else:
                 print(f'Unhandled case: [{text}] ({font_size})')
