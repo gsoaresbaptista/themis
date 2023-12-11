@@ -15,7 +15,7 @@ class PDFLayout:
         self._lines = lines
 
     def build(self) -> list[MainBlock]:
-        book_sections = []
+        book_sections: list[MainBlock] = []
 
         for text, font_size, references in self._lines:
             if font_size == 28:
@@ -35,7 +35,9 @@ class PDFLayout:
                     text.startswith('TÍTULO')
                     or text.startswith('Preâmbulo')
                     or text.startswith('Ato')
+                    or text.startswith('DISPOSIÇÕES')
                     or font_size == 18
+                    or (font_size == 11 and text.startswith('PARTE '))
                 ):
                     title = Title()
                     title.set_name(text)
@@ -51,7 +53,7 @@ class PDFLayout:
                     book_sections[-1].add_title(subtitle)
                     print('SET SUBTITLE NAME:', text)
 
-                elif text.startswith('LIVRO '):
+                elif text.startswith('LIVRO ') or (font_size == 11 and text.startswith('PARTE ')):
                     book = Book()
                     book.set_name(text)
                     book_sections[-1].add_book(book)
@@ -60,7 +62,7 @@ class PDFLayout:
                 else:
                     print(f'* Unhandled case: [{text}] ({font_size})')
                     exit(0)
-
+            
             elif font_size == 10:
                 if text.startswith('Seção'):
                     section = Section()
@@ -82,18 +84,24 @@ class PDFLayout:
 
                 print('SET ARTICLE CONTENT', text[:50].replace('\n', ''))
 
+            elif font_size == 9:
+                print('*Ignoring data:', text)
+
             elif font_size == 8:
                 print('*Ignoring data:', text)
 
-            elif font_size == 7.0 and (
-                text.startswith('Nota do Editor') or text.startswith('NE')
-            ):
-                notes = text.split('\n')
+            elif font_size == 7.0:
+                if text.startswith('Nota do Editor') or text.startswith('NE'):
+                    notes = text.split('.\n')
 
-                for content, indice in zip(notes, references):
-                    book_sections[-1].add_reference(indice, content)
+                    for content, indice in zip(notes, references):
+                        book_sections[-1].add_reference(indice, content)
 
-                print('SET REFERENCES:', references)
+                    print('SET REFERENCES:', references, content[:50])
+
+                else:
+                    book_sections[-1]._notes[-1]._content += ' ' + text
+                    print('EXTENDING NOTE CONTENT:', text[:50])
 
             else:
                 print(f'Unhandled case: [{text}] ({font_size})')

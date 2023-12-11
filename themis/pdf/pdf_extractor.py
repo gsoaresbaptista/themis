@@ -97,7 +97,7 @@ class PDFExtractor:
 
                 reference_content = self._join_lines(reference_content)
                 book.insert(-1, (reference_content, 7.0, reference_indices))
-                current_id = start_reference_id
+                current_id = start_reference_id - 1
 
             else:
                 current_line = self._join_lines(current_lines)
@@ -124,9 +124,6 @@ class PDFExtractor:
         ):
             if page_number in IGNORED_PAGES:
                 continue
-
-            if page_number > 200:
-                break
 
             text_elements = []
 
