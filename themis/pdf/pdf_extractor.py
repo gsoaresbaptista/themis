@@ -1,3 +1,4 @@
+import re
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextLineHorizontal, LTTextContainer, LTChar
 
@@ -56,28 +57,43 @@ class PDFExtractor:
 
     def _aggregate_by_fonts(self, lines):
         book = []
-        current_lines, current_font = [], lines[0][1]
+        current_lines, current_font, current_ref = (
+            [],
+            lines[0][1],
+            [lines[0][2]],
+        )
 
         current_id = 0
 
         while current_id < len(lines):
-            if lines[current_id][1] == current_font:
+            if lines[current_id][1] == current_font and not (
+                current_font == 11.0
+                and (
+                    lines[current_id][0].startswith('CAPÍTULO')
+                    or lines[current_id][0].startswith('TÍTULO')
+                )
+            ):
                 current_lines.append(lines[current_id][0])
+
+                if lines[current_id][2] not in current_ref:
+                    current_ref.append(lines[current_id][2])
+
             else:
                 current_line = self._join_lines(current_lines)
-                book.append(current_line)
+                book.append((current_line, current_font, current_ref))
 
                 if current_id + 1 >= len(lines):
                     break
 
                 current_lines = [lines[current_id][0]]
                 current_font = lines[current_id][1]
+                current_ref = [lines[current_id][2]]
 
             current_id += 1
 
         if len(current_lines) > 0:
             current_line = self._join_lines(current_lines)
-            book.append(current_line)
+            book.append((current_line, current_font, current_ref))
 
         return book
 
@@ -88,7 +104,7 @@ class PDFExtractor:
             if page_number in IGNORED_PAGES:
                 continue
 
-            if page_number > 20:
+            if page_number > 28:
                 break
 
             for element in page_layout:
@@ -96,14 +112,29 @@ class PDFExtractor:
                     for text_line in element:
                         if isinstance(text_line, LTTextLineHorizontal):
                             text = ''
+                            note_ref = ''
                             font_name = None
                             font_size = None
 
                             for text_element in text_line:
                                 if isinstance(text_element, LTChar):
-                                    text += text_element.get_text()
-                                    font_name = text_element.fontname
-                                    font_size = round(text_element.size, 1)
+                                    content = text_element.get_text()
+
+                                    # get note reference
+                                    if round(text_element.size, 1) in [
+                                        4.1,
+                                        5.5,
+                                    ]:
+                                        if content.isnumeric():
+                                            note_ref += content
+
+                                    elif font_size is None:
+                                        font_name = text_element.fontname
+                                        font_size = round(text_element.size, 1)
+                                        text += content
+
+                                    else:
+                                        text += content
 
                             # ignore page number
                             if not (
@@ -115,6 +146,7 @@ class PDFExtractor:
                                     (
                                         text.replace('\t', ' ').strip(),
                                         font_size,
+                                        0 if note_ref == '' else int(note_ref),
                                     )
                                 )
 
