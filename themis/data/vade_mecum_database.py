@@ -39,26 +39,30 @@ def create_sqlite_database(
                                         if len(block._notes) > index - 1
                                     ]
 
-                                    cursor.execute(
-                                        """
-                                        INSERT INTO codes (
-                                            code, book, title, subtitle,
-                                            chapter, section, subsection,
-                                            articles, notes)
-                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                                        """,
-                                        (
-                                            block._name,
-                                            book._name,
-                                            title._name,
-                                            subtitle._name,
-                                            chapter._name,
-                                            section._name,
-                                            subsection._name,
-                                            article._content,
-                                            '\n'.join(notes) if notes else '',
-                                        ),
-                                    )
+                                    articles = artigos = [f"Art.{art}" for art in article._content.split("Art.") if art.strip()]
+
+
+                                    for article_text in articles:
+                                        cursor.execute(
+                                            """
+                                            INSERT INTO codes (
+                                                code, book, title, subtitle,
+                                                chapter, section, subsection,
+                                                articles, notes)
+                                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                            """,
+                                            (
+                                                block._name,
+                                                book._name,
+                                                title._name,
+                                                subtitle._name,
+                                                chapter._name,
+                                                section._name,
+                                                subsection._name,
+                                                article_text,
+                                                '\n'.join(notes) if notes else '',
+                                            ),
+                                        )
 
     conn.commit()
     cursor.close()
