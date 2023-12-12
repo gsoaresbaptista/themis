@@ -105,6 +105,9 @@ class Title(WrapperTextElement):
     def add_section(self, section: Section) -> None:
         self._sub_titles[-1].add_section(section)
 
+    def add_subtitle(self, subtitle: SubTitle) -> None:
+        self._sub_titles.append(subtitle)
+
 
 class Book(WrapperTextElement):
     def __init__(self) -> None:
@@ -113,6 +116,11 @@ class Book(WrapperTextElement):
 
     def add_title(self, title: Title) -> None:
         self._titles.append(title)
+
+    def add_subtitle(self, subtitle: SubTitle) -> None:
+        if not self._titles:
+            self._titles.append(Title())
+        self._titles[-1].add_subtitle(subtitle)
 
     def add_article(self, article: Article) -> None:
         if not self._titles:
@@ -139,6 +147,11 @@ class MainBlock(WrapperTextElement):
         if not self._books:
             self._books.append(Book())
         self._books[-1].add_title(title)
+
+    def add_subtitle(self, subtitle: SubTitle) -> None:
+        if not self._books:
+            self._books.append(Book())
+        self._books[-1].add_subtitle(subtitle)
 
     def add_article(self, article: Article) -> None:
         if not self._books:

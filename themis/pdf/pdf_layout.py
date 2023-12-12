@@ -1,4 +1,4 @@
-from utils import (
+from .utils import (
     MainBlock,
     Title,
     SubTitle,
@@ -50,10 +50,12 @@ class PDFLayout:
                 elif text.startswith('SUBTÍTULO'):
                     subtitle = SubTitle()
                     subtitle.set_name(text)
-                    book_sections[-1].add_title(subtitle)
+                    book_sections[-1].add_subtitle(subtitle)
                     print('SET SUBTITLE NAME:', text)
 
-                elif text.startswith('LIVRO ') or (font_size == 11 and text.startswith('PARTE ')):
+                elif text.startswith('LIVRO ') or (
+                    font_size == 11 and text.startswith('PARTE ')
+                ):
                     book = Book()
                     book.set_name(text)
                     book_sections[-1].add_book(book)
@@ -62,7 +64,7 @@ class PDFLayout:
                 else:
                     print(f'* Unhandled case: [{text}] ({font_size})')
                     exit(0)
-            
+
             elif font_size == 10:
                 if text.startswith('Seção'):
                     section = Section()

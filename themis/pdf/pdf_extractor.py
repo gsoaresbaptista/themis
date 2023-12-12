@@ -2,7 +2,7 @@ import re
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextLineHorizontal, LTTextContainer, LTChar
 
-from constants import (
+from .constants import (
     ALLOW_SPACE,
     ALLOW_LINE_BREAK,
     ALLOW_CONTINUE,
