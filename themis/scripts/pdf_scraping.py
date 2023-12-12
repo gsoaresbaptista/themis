@@ -1,7 +1,6 @@
-from pdf.pdf_extractor import PDFExtractor
-from pdf.pdf_layout import PDFLayout
-
-from data.database import create_sqlite_database
+from themis.pdf.pdf_extractor import PDFExtractor
+from themis.pdf.pdf_layout import PDFLayout
+from themis.data.vade_mecum_database import create_sqlite_database
 
 if __name__ == '__main__':
     pdf_path = 'data/pdf/Vade_mecum_2023.pdf'

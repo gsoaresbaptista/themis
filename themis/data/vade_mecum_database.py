@@ -1,5 +1,5 @@
 import sqlite3
-from pdf.utils import MainBlock
+from themis.pdf.utils import MainBlock
 
 
 def create_sqlite_database(
