@@ -39,8 +39,13 @@ def create_sqlite_database(
                                         if len(block._notes) > index - 1
                                     ]
 
-                                    articles = artigos = [f"Art.{art}" for art in article._content.split("Art.") if art.strip()]
-
+                                    articles = artigos = [
+                                        f'Art.{art}'
+                                        for art in article._content.split(
+                                            'Art.'
+                                        )
+                                        if art.strip()
+                                    ]
 
                                     for article_text in articles:
                                         cursor.execute(
@@ -60,7 +65,9 @@ def create_sqlite_database(
                                                 section._name,
                                                 subsection._name,
                                                 article_text,
-                                                '\n'.join(notes) if notes else '',
+                                                '\n'.join(notes)
+                                                if notes
+                                                else '',
                                             ),
                                         )
 
