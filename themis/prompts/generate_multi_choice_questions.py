@@ -17,9 +17,9 @@ errors = []
 
 def get_response(data, webdriver):
     prompt = (
-        'Dado o texto abaixo, crie uma pergunta com a resposta e retorne APENAS uma linha contendo '
-        'a pergunta e resposta separadas por ;. Dê respostas completas e referencie o artigo que foi '
-        'fornecido. Artigo: "'
+        'Dado o texto abaixo, crie uma pergunta de múltipla escolha com 5 letras, de A até E. '
+        'Também retorne a resposta comentada da questão, indicando porque foi escolhido aquela letra. '
+        'Não faça perguntas sobre títulos. Artigo: "'
         f'{data}\n"\n'
         '"'
     )
@@ -44,7 +44,7 @@ def save_csv(response):
 
 
 if __name__ == '__main__':
-    csv_file_name = 'questions.csv'
+    csv_file_name = 'multi_choice_questions.csv'
 
     options = ChromeOptions()
     options.add_argument('--incognito')
