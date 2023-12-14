@@ -3,11 +3,23 @@ import pandas as pd
 from time import sleep
 import g4f
 import re
+import sqlite3
+from io import StringIO
+import csv
+from freeGPT import Client
+from datetime import datetime, timedelta
+from undetected_chromedriver import Chrome, ChromeOptions
+
+options = ChromeOptions()
+options.add_argument('--incognito')
+webdriver = Chrome(options=options, headless=True)
 
 
-if __name__ == '__main__':
-    csv_file_name = 'instructions.csv'
-    responses = []
+responses = []
+errors = []
+
+
+def get_response():
     prompt = (
         'Me dê uma lista com 10 frases enumeradas de instruções para um modelo de '
         'LLM que pedem para o  modelo responder uma questão '
@@ -15,29 +27,78 @@ if __name__ == '__main__':
         'Ou "Me responda a questao: " . A lista deve contar apenas as frases de prompts.'
     )
 
-    pattern = re.compile(r'\d+\.\s*(.*)')
+    response = g4f.ChatCompletion.create(
+        model=g4f.models.default,
+        messages=[{'role': 'user', 'content': prompt}],
+        webdriver=webdriver,
+    )
 
-    for i in range(184):
-        full_message = ''
-        response = g4f.ChatCompletion.create(
-            model='gpt-3.5-turbo',
-            messages=[{'role': 'user', 'content': prompt}],
-            stream=True,
-        )
+    return response
 
-        for message in response:
-            print(message, flush=True, end='')
-            full_message += message
 
-        responses.append(pattern.findall(full_message))
-        sleep(3)
+def save_csv(response):
+    responses.extend(response)
 
-        # clean data
-        responses = [
-            [item.replace('"', '') for item in row if item != '']
-            for row in responses
-        ]
+    with open(csv_file_name, 'a', newline='\n') as file:
+        file.write(response)
 
-        # save to csv
-        df = pd.DataFrame({'prompts': responses})
-        df.to_csv(csv_file_name, index=False, header=False)
+
+if __name__ == '__main__':
+    csv_file_name = 'instructions.csv'
+
+    for i in range(1000):
+        try:
+            response = get_response()
+    
+        except KeyboardInterrupt as error:
+            break
+
+        except Exception as exception:
+            print(exception)
+            print('* Error in:')
+            errors.append(0)
+            webdriver.quit()
+            options = ChromeOptions()
+            options.add_argument('--incognito')
+            webdriver = Chrome(options=options, headless=True)
+
+        else:
+            if (
+                'GPT-3.5' in response
+                or 'Claro, aqui está' in response
+                or 'API failed' in response
+            ):
+                errors.append(0)
+            else:
+                print(i)
+                save_csv(response)
+
+    while errors:
+        print('ERROR PROCESSING')
+        row = errors[0]
+
+        try:
+            response = get_response(row)
+
+        except KeyboardInterrupt as error:
+            break
+
+        except:
+            pass
+
+        else:
+            if not (
+                'GPT-3.5' in response
+                or 'Claro, aqui está' in response
+                or 'API failed' in response
+            ):
+                save_csv(response)
+                errors.pop(0)
+            else:
+                webdriver.quit()
+                options = ChromeOptions()
+                options.add_argument('--incognito')
+                webdriver = Chrome(options=options, headless=True)
+
+
+    webdriver.quit()
