@@ -1,14 +1,8 @@
-import asyncio
-import pandas as pd
-from time import sleep
 import g4f
-import re
 import sqlite3
-from io import StringIO
 import csv
-from freeGPT import Client
-from datetime import datetime, timedelta
 from undetected_chromedriver import Chrome, ChromeOptions
+import random
 
 
 responses = []
@@ -17,9 +11,9 @@ errors = []
 
 def get_response(data, webdriver):
     prompt = (
-        'Dado o texto abaixo, crie uma pergunta com a resposta e retorne APENAS uma linha contendo '
-        'a pergunta e resposta separadas por ;. Dê respostas completas e referencie o artigo que foi '
-        'fornecido. Artigo: "'
+        'Com base no seguinte texto, formule uma pergunta cuja resposta esteja contida no texto e retorne '
+        'APENAS uma linha contendo a pergunta e resposta separadas por ;. Responda de maneira completa '
+        'e cite a fonte do artigo fornecido. Evite perguntas sobre títulos. Artigo: "'
         f'{data}\n"\n'
         '"'
     )
@@ -48,22 +42,23 @@ if __name__ == '__main__':
 
     options = ChromeOptions()
     options.add_argument('--incognito')
-    webdriver = Chrome(options=options, headless=True, browser_executable_path='/usr/bin/chromium', driver_executable_path='/tmp/chromedriver')
+    webdriver = Chrome(options=options, headless=True)
 
     conn = sqlite3.connect('./data/sqlite/vade_mecum.db')
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM codes')
 
-    method = 'freegpt'
+    articles = list(cursor)
+    random.shuffle(articles)
 
-    for row in list(cursor)[::-1]:
+    for row in articles:
         try:
             data = '\n'.join(
                 [element for element in row[1:] if element is not None]
             )
             response = get_response(data, webdriver)
 
-        except KeyboardInterrupt as error:
+        except KeyboardInterrupt:
             print([row[0] for row in errors])
             exit(0)
 
@@ -74,7 +69,7 @@ if __name__ == '__main__':
             webdriver.quit()
             options = ChromeOptions()
             options.add_argument('--incognito')
-            webdriver = Chrome(options=options, headless=True, browser_executable_path='/usr/bin/chromium', driver_executable_path='/tmp/chromedriver')
+            webdriver = Chrome(options=options, headless=True)
 
         else:
             if (
@@ -94,12 +89,9 @@ if __name__ == '__main__':
         try:
             response = get_response(row, webdriver)
 
-        except KeyboardInterrupt as error:
+        except KeyboardInterrupt:
             print([row[0] for row in errors])
             exit(0)
-
-        except:
-            pass
 
         else:
             if not (
@@ -114,8 +106,7 @@ if __name__ == '__main__':
                 webdriver.quit()
                 options = ChromeOptions()
                 options.add_argument('--incognito')
-                webdriver = Chrome(options=options, headless=True, browser_executable_path='/usr/bin/chromium', driver_executable_path='/tmp/chromedriver')
-
+                webdriver = Chrome(options=options, headless=True)
 
     cursor.close()
     conn.close()
