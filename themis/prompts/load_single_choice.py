@@ -14,7 +14,7 @@ if __name__ == '__main__':
                     except IndexError:
                         print(f'Error in line {j + 1}, file: {i + 1}')
 
-    conn = sqlite3.connect(f'single_questions.db')
+    conn = sqlite3.connect(f'questions.db')
     cursor = conn.cursor()
 
     cursor.execute(

@@ -25,7 +25,7 @@ if __name__ == '__main__':
                 else:
                     answer_lines += line
 
-    conn = sqlite3.connect(f'multiple_choice_questions.db')
+    conn = sqlite3.connect(f'questions.db')
     cursor = conn.cursor()
 
     cursor.execute(
