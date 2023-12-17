@@ -14,6 +14,10 @@ selenium = "^4.16.0"
 beautifulsoup4 = "^4.12.2"
 pandas = "^2.1.4"
 g4f = "^0.1.9.3"
+transformers = "^4.36.1"
+peft = {git = "https://github.com/huggingface/peft.git"}
+sentencepiece = "^0.1.99"
+protobuf = "^4.25.1"
 
 
 [tool.poetry.group.dev.dependencies]
