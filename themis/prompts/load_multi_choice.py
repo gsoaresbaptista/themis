@@ -15,7 +15,7 @@ if __name__ == '__main__':
                     continue
 
                 elif line == ';\n':
-                    tuples.append((question_lines, answer_lines))
+                    tuples.append((question_lines.replace('\'', '"').strip('"'), answer_lines.replace('\'', '"').strip('"')))
                     question = True
                     question_lines, answer_lines = '', ''
                     continue

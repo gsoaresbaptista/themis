@@ -10,7 +10,7 @@ if __name__ == '__main__':
                 for j, line in enumerate(file):
                     try:
                         qa_pairs = re.split(r'\?\;', line)
-                        tuples.append(((qa_pairs[0] + '?').strip(), qa_pairs[1].strip()))
+                        tuples.append(((qa_pairs[0] + '?').replace('\'', '"').strip('"'), qa_pairs[1].replace('\'', '"').strip('"')))
                     except IndexError:
                         print(f'Error in line {j + 1}, file: {i + 1}')
 

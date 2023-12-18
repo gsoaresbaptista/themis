@@ -23,6 +23,26 @@ if __name__ == '__main__':
         lambda number, code: f'O que se pode extrair do Artigo {number} do(a) {code}?',
         lambda number, code: f'Forneça uma análise do Artigo {number} do(a) {code}.',
         lambda number, code: f'Destaque as principais informações do Artigo {number} do(a) {code}.',
+        lambda number, code: f'Qual é o significado do Artigo {number} do(a) {code}?',
+        lambda number, code: f'Explique o teor do Artigo {number} do(a) {code}.',
+        lambda number, code: f'Comente sobre as disposições do Artigo {number} do(a) {code}.',
+        lambda number, code: f'Descreva o conteúdo normativo do Artigo {number} do(a) {code}.',
+        lambda number, code: f'Discorra sobre as implicações do Artigo {number} do(a) {code}.',
+        lambda number, code: f'Peço esclarecimentos acerca do Artigo {number} do(a) {code}.',
+        lambda number, code: f'Gostaria de obter informações sobre o Artigo {number} do(a) {code}.',
+        lambda number, code: f'Explique as disposições contidas no Artigo {number} do(a) {code}.',
+        lambda number, code: f'Quais são os detalhes do Artigo {number} do(a) {code}?',
+        lambda number, code: f'Apresente uma análise do Artigo {number} do(a) {code}.',
+        lambda number, code: f'O Artigo {number} do(a) {code} aborda qual temática?',
+        lambda number, code: f'Pode comentar sobre o que consta no Artigo {number} do(a) {code}?',
+        lambda number, code: f'Gostaria de compreender o que está estabelecido no Artigo {number} do(a) {code}.',
+        lambda number, code: f'Informe-me sobre os aspectos do Artigo {number} do(a) {code}.',
+        lambda number, code: f'Discuta os elementos presentes no Artigo {number} do(a) {code}.',
+        lambda number, code: f'No Artigo {number} do(a) {code}, qual é a disposição principal?',
+        lambda number, code: f'Explique o conteúdo legal do Artigo {number} do(a) {code}.',
+        lambda number, code: f'O que se pode inferir do Artigo {number} do(a) {code}?',
+        lambda number, code: f'Forneça uma avaliação do Artigo {number} do(a) {code}.',
+        lambda number, code: f'Destaque os principais pontos do Artigo {number} do(a) {code}.',
     ]
 
     db_path = 'data/sqlite/vade_mecum.db'
@@ -49,7 +69,10 @@ if __name__ == '__main__':
             if article_number[0] == 'Art.':
                 number = article_number[1][:-1] if article_number[-1] == '.' else article_number[1]
                 prompt = questions[random.choice(range(len(questions)))](number, code)
-                tuples.append((prompt, f'{articles.strip()}\n{notes.strip()}'))
+                tuples.append((
+                    prompt.replace('\'', '"').strip('"'),
+                    f'{articles.strip()}\n{notes.strip()}'.replace('\'', '"').strip('"')
+                ))
 
     # close the cursor and the connection
     cursor.close()

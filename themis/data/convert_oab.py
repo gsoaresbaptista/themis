@@ -20,7 +20,17 @@ if __name__ == '__main__':
 
     for row in rows:
         _, _, _, enum, a, b, c, d, correct, just = row
-        tuples.append((f'{enum}\nA) {a}\nB) {b}\nC) {c}\nD) {d}', f'{correct}\n{just}'))
+
+        a = a.replace('\'', '"').strip('"')
+        b = b.replace('\'', '"').strip('"')
+        c = c.replace('\'', '"').strip('"')
+        d = d.replace('\'', '"').strip('"')
+        correct = correct.replace('\'', '"').strip('"')
+
+        if enum is not None and just is not None:
+            just = just.replace('\'', '"').strip('"')
+            enum = enum.replace('\'', '"').strip('"')
+            tuples.append((f'{enum}\nA) {a}\nB) {b}\nC) {c}\nD) {d}', f'{correct}\n{just}'))
 
     # close the cursor and the connection
     cursor.close()
