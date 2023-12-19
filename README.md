@@ -2,8 +2,7 @@
 
 # Themis
 
-<img src="images/themis.png" alt="drawing" width="300" style="border-radius:50%"/>
-
+<img src="images/themis.png" width="300" style="border-radius:50%"/>
 </div>
 
 
@@ -57,4 +56,4 @@ Ambos os repositórios auxiliares são fundamentais para a operação completa d
 ### Contato
 
 - Gabriel Soares Baptista - gsoaresbaptista@gmail.com
-- Humberto Giuri Calente - humbertogiuri@gmail.co
+- Humberto Giuri Calente - humbertogiuri@gmail.com
