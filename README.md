@@ -16,6 +16,10 @@ O Projeto Themis é uma iniciativa pioneira na interseção entre tecnologia e d
 - **Aplicação Prática**: O modelo aprimorado é integrado em uma interface gráfica interativa, permitindo aos usuários interagir diretamente com o modelo para obter respostas a questões jurídicas.
 - **Tecnologias Utilizadas**: Utilização de técnicas avançadas de treinamento de LLM, incluindo o algoritmo QLoRA, que é eficaz mesmo com recursos computacionais limitados.
 
+### Dados
+
+Os dados utilizados no fine-tuning do modelo podem ser acessados em `data/sqlite/questions.db`. Os outros bancos nessa pastas são bancos intermediários com as informações obtidas para gerar o conjunto final. 
+
 ### Interface Gráfica
 
 #### Design e Usabilidade
